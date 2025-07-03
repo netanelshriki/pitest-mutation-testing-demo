@@ -49,11 +49,12 @@ class UserServiceTest {
         userService.createUser("testuser", "test@example.com", 
                              LocalDate.of(1990, 1, 1));
         
-        // Only tests one valid score update
+        // Only tests one valid score update - but this will trigger bonus logic!
+        // Since oldScore=0 < 50 and newScore=75 >= 50, bonus of 10 will be added
         userService.updateUserScore("testuser", 75);
         
         User user = userService.getAllUsers().get(0);
-        assertEquals(75, user.getScore());
+        assertEquals(85, user.getScore()); // 75 + 10 bonus = 85
         
         // Doesn't test:
         // - Score boundaries (49, 50, 51)
@@ -66,10 +67,13 @@ class UserServiceTest {
     @Test
     @DisplayName("Should calculate user ranking")
     void shouldCalculateUserRanking() {
-        userService.createUser("testuser", "test@example.com", 
-                             LocalDate.of(1990, 1, 1));
+        // Create user with a score > 0 to ensure ranking > 0
+        User user = userService.createUser("testuser", "test@example.com", 
+                                         LocalDate.of(1990, 1, 1));
+        // Set score to ensure ranking is > 0
+        user.setScore(50); // This will make ranking > 0
         
-        // Only tests one scenario
+        // Now calculate ranking
         double ranking = userService.calculateUserRanking("testuser");
         assertTrue(ranking > 0);
         
@@ -195,6 +199,22 @@ class UserServiceTest {
         // - Negative scores
         // - Boundary values (100, 101)
         // - Non-existent users
+    }
+
+    @Test
+    @DisplayName("Should handle score update without bonus")
+    void shouldHandleScoreUpdateWithoutBonus() {
+        userService.createUser("testuser", "test@example.com", 
+                             LocalDate.of(1990, 1, 1));
+        
+        // First update to 60 (triggers bonus: 60 + 10 = 70)
+        userService.updateUserScore("testuser", 60);
+        User user = userService.getAllUsers().get(0);
+        assertEquals(70, user.getScore());
+        
+        // Second update to 80 (no bonus since oldScore >= 50)
+        userService.updateUserScore("testuser", 80);
+        assertEquals(80, user.getScore());
     }
 }
 
