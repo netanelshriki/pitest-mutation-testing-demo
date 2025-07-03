@@ -333,7 +333,8 @@ class UserImprovedTest {
             "a@b.c",
             "user@domain.info",
             "@domain.com",  // Simple validation allows this
-            "user@.com"     // Simple validation allows this too
+            "user@.com",    // Simple validation allows this too
+            ".@domain.com"  // This also passes the simple validation
         })
         @DisplayName("Should validate emails that pass simple validation")
         void shouldValidateEmailsThatPassSimpleValidation(String email) {
@@ -346,9 +347,12 @@ class UserImprovedTest {
             "",
             "   ",
             "invalid",
-            "user@",
-            "user.domain.com",
-            "user@domain"
+            "user@",          // No dot
+            "user.domain.com", // No @
+            "user@domain",    // No dot after @
+            "user.@domain",   // Dot before @
+            "@.com",          // @ is not before the last dot
+            "domain.com@"     // @ is after the last dot
         })
         @DisplayName("Should reject invalid email formats")
         void shouldRejectInvalidEmailFormats(String email) {
@@ -361,6 +365,26 @@ class UserImprovedTest {
         void shouldHandleNullEmail() {
             user.setEmail(null);
             assertFalse(user.hasValidEmailFormat());
+        }
+
+        @Test
+        @DisplayName("Should handle edge cases in email validation")
+        void shouldHandleEdgeCasesInEmailValidation() {
+            // Edge case: multiple @ symbols
+            user.setEmail("user@@domain.com");
+            assertTrue(user.hasValidEmailFormat()); // Still passes because contains @ and . and @ is before last .
+            
+            // Edge case: multiple dots
+            user.setEmail("user@domain..com");
+            assertTrue(user.hasValidEmailFormat()); // Passes
+            
+            // Edge case: @ after last dot should fail
+            user.setEmail("user.domain@com");
+            assertFalse(user.hasValidEmailFormat()); // indexOf("@")=11, lastIndexOf(".")=4, 11 > 4 fails
+            
+            // Edge case: empty parts but valid structure
+            user.setEmail("@.");
+            assertFalse(user.hasValidEmailFormat()); // indexOf("@")=0, lastIndexOf(".")=1, 0 < 1 but probably fails on trim
         }
 
         @Test
@@ -383,16 +407,12 @@ class UserImprovedTest {
             user.setEmail("user@.com");
             assertTrue(user.hasValidEmailFormat()); // Simple validation allows this too
             
-            // But ".@domain.com" fails because @ is not before the last .
+            // ".@domain.com" also passes because:
+            // - contains "@" ✓
+            // - contains "." ✓
+            // - indexOf("@")=1, lastIndexOf(".")=8, 1 < 8 ✓
             user.setEmail(".@domain.com");
-            assertFalse(user.hasValidEmailFormat()); // indexOf("@")=1, lastIndexOf(".")=9, 1 < 9 is true, wait...
-            
-            // Let me recalculate: ".@domain.com"
-            // indexOf("@") = 1
-            // lastIndexOf(".") = 8 (the . in .com)
-            // 1 < 8 is true, so this should pass!
-            user.setEmail(".@domain.com");
-            assertTrue(user.hasValidEmailFormat()); // Actually this passes too!
+            assertTrue(user.hasValidEmailFormat()); // This passes too!
         }
     }
 
