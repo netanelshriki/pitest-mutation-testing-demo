@@ -15,7 +15,7 @@
     <groupId>com.example</groupId>
     <artifactId>pitest-mutation-testing-demo</artifactId>
     <version>1.0.0-SNAPSHOT</version>
-    <name>PIT Mutation Testing Demo</name>
+    <n>PIT Mutation Testing Demo</n>
     <description>A comprehensive Spring Boot project demonstrating PIT mutation testing</description>
 
     <properties>
