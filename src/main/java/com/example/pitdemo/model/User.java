@@ -154,10 +154,46 @@ public class User {
         if (email == null || email.trim().isEmpty()) {
             return false;
         }
-        
-        return email.contains("@") && 
-               email.contains(".") && 
-               email.indexOf("@") < email.lastIndexOf(".");
+
+        // Basic structure checks
+        if (!email.contains("@") || !email.contains(".")) {
+            return false;
+        }
+
+        // Check for multiple @ symbols
+        if (email.indexOf("@") != email.lastIndexOf("@")) {
+            return false;
+        }
+
+        int atIndex = email.indexOf("@");
+        int lastDotIndex = email.lastIndexOf(".");
+
+        // @ must come before the last .
+        if (atIndex >= lastDotIndex) {
+            return false;
+        }
+
+        // There must be at least one character before @
+        if (atIndex == 0) {
+            return false;
+        }
+
+        // There must be at least one character after the last .
+        if (lastDotIndex == email.length() - 1) {
+            return false;
+        }
+
+        // There must be at least one character between @ and .
+        if (lastDotIndex - atIndex <= 1) {
+            return false;
+        }
+
+        // Check for consecutive dots or @ followed immediately by .
+        if (email.contains("..") || email.contains("@.")) {
+            return false;
+        }
+
+        return true;
     }
 
     // Getters and Setters
