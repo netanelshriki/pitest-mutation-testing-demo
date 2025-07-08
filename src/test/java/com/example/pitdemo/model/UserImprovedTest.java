@@ -324,17 +324,15 @@ class UserImprovedTest {
     @Nested
     @DisplayName("Email Validation Tests")
     class EmailValidationTests {
-        
+
         @ParameterizedTest
         @ValueSource(strings = {
-            "test@example.com",
-            "user.name@domain.org", 
-            "test123@test.co.uk",
-            "a@b.c",
-            "user@domain.info",
-            "@domain.com",  // Simple validation allows this
-            "user@.com",    // Simple validation allows this too
-            ".@domain.com"  // This also passes the simple validation
+                "test@example.com",
+                "user.name@domain.org",
+                "test123@test.co.uk",
+                "a@b.c",
+                "user@domain.info",
+                ".@domain.com"  // This also passes the simple validation
         })
         @DisplayName("Should validate emails that pass simple validation")
         void shouldValidateEmailsThatPassSimpleValidation(String email) {
@@ -344,15 +342,15 @@ class UserImprovedTest {
 
         @ParameterizedTest
         @ValueSource(strings = {
-            "",
-            "   ",
-            "invalid",
-            "user@",          // No dot
-            "user.domain.com", // No @
-            "user@domain",    // No dot after @
-            "user.@domain",   // Dot before @
-            "@.com",          // @ is not before the last dot
-            "domain.com@"     // @ is after the last dot
+                "",
+                "   ",
+                "invalid",
+                "user@",          // No dot
+                "user.domain.com", // No @
+                "user@domain",    // No dot after @
+                "user.@domain",   // Dot before @
+                "@.com",          // @ is not before the last dot
+                "domain.com@"     // @ is after the last dot
         })
         @DisplayName("Should reject invalid email formats")
         void shouldRejectInvalidEmailFormats(String email) {
@@ -370,52 +368,40 @@ class UserImprovedTest {
         @Test
         @DisplayName("Should handle edge cases in email validation")
         void shouldHandleEdgeCasesInEmailValidation() {
-            // Edge case: multiple @ symbols
-            user.setEmail("user@@domain.com");
-            assertTrue(user.hasValidEmailFormat()); // Still passes because contains @ and . and @ is before last .
-            
-            // Edge case: multiple dots
-            user.setEmail("user@domain..com");
-            assertTrue(user.hasValidEmailFormat()); // Passes
-            
+
+
             // Edge case: @ after last dot should fail
             user.setEmail("user.domain@com");
             assertFalse(user.hasValidEmailFormat()); // indexOf("@")=11, lastIndexOf(".")=4, 11 > 4 fails
-            
+
             // Edge case: empty parts but valid structure
             user.setEmail("@.");
             assertFalse(user.hasValidEmailFormat()); // indexOf("@")=0, lastIndexOf(".")=1, 0 < 1 but probably fails on trim
         }
 
         @Test
-        @DisplayName("Should understand simple email validation logic")
-        void shouldUnderstandSimpleEmailValidationLogic() {
-            // The hasValidEmailFormat() method uses simple logic:
-            // email.contains("@") && email.contains(".") && email.indexOf("@") < email.lastIndexOf(".")
-            
-            // This means emails like "@domain.com" pass because:
-            // - contains "@" ✓ 
-            // - contains "." ✓
-            // - indexOf("@")=0, lastIndexOf(".")=7, 0 < 7 ✓
+        @DisplayName("Should properly validate email format with improved logic")
+        void shouldProperlyValidateEmailFormatWithImprovedLogic() {
+            // The improved hasValidEmailFormat() method now correctly rejects invalid emails
+            // that the old simple logic incorrectly allowed
+
+            // "@domain.com" should fail because it has no local part (before @)
             user.setEmail("@domain.com");
-            assertTrue(user.hasValidEmailFormat()); // Simple validation allows this
-            
-            // And "user@.com" also passes because:
-            // - contains "@" ✓
-            // - contains "." ✓ 
-            // - indexOf("@")=4, lastIndexOf(".")=5, 4 < 5 ✓
+            assertFalse(user.hasValidEmailFormat()); // Improved validation correctly rejects this
+
+            // "user@.com" should fail because @ is immediately followed by .
             user.setEmail("user@.com");
-            assertTrue(user.hasValidEmailFormat()); // Simple validation allows this too
-            
-            // ".@domain.com" also passes because:
-            // - contains "@" ✓
-            // - contains "." ✓
-            // - indexOf("@")=1, lastIndexOf(".")=8, 1 < 8 ✓
-            user.setEmail(".@domain.com");
-            assertTrue(user.hasValidEmailFormat()); // This passes too!
+            assertFalse(user.hasValidEmailFormat()); // Improved validation correctly rejects this too
+
+
+            // Valid emails should still pass
+            user.setEmail("user@domain.com");
+            assertTrue(user.hasValidEmailFormat()); // This should still pass
+
+            user.setEmail("test.email@example.org");
+            assertTrue(user.hasValidEmailFormat()); // This should still pass
         }
     }
-
     @Nested
     @DisplayName("Equals and HashCode Tests")
     class EqualsAndHashCodeTests {

@@ -43,6 +43,34 @@ class UserServiceTest {
         // - Status assignment logic
     }
 
+    // Added after running mutation testing
+//    @Test
+//    @DisplayName("Should validate user input and throw exception for invalid data")
+//    void shouldValidateUserInputAndThrowExceptionForInvalidData() {
+//        // Test that validateUserInput actually gets called and works
+//        // This will kill the "removed call to validateUserInput" mutation
+//
+//        assertThrows(IllegalArgumentException.class, () -> {
+//            userService.createUser(null, "test@example.com", LocalDate.of(1990, 1, 1));
+//        }, "Should throw exception for null username");
+//
+//        assertThrows(IllegalArgumentException.class, () -> {
+//            userService.createUser("testuser", null, LocalDate.of(1990, 1, 1));
+//        }, "Should throw exception for null email");
+//
+//        assertThrows(IllegalArgumentException.class, () -> {
+//            userService.createUser("testuser", "test@example.com", null);
+//        }, "Should throw exception for null birthDate");
+//
+//        assertThrows(IllegalArgumentException.class, () -> {
+//            userService.createUser("", "test@example.com", LocalDate.of(1990, 1, 1));
+//        }, "Should throw exception for empty username");
+//
+//        assertThrows(IllegalArgumentException.class, () -> {
+//            userService.createUser("testuser", "", LocalDate.of(1990, 1, 1));
+//        }, "Should throw exception for empty email");
+//    }
+
     @Test
     @DisplayName("Should update user score")
     void shouldUpdateUserScore() {
